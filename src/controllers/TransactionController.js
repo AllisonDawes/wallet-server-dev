@@ -2,6 +2,9 @@ import * as Yup from "yup";
 import parsePhoneNumber from "libphonenumber-js";
 import { cpf, cnpj } from "cpf-cnpj-validator";
 
+import Cart from "../models/Cart";
+import TransactionService from "../service/TransactionService";
+
 class TransactionController {
   async create(req, res) {
     try {
@@ -19,7 +22,7 @@ class TransactionController {
         billingCity,
         billingState,
         billingZipCode,
-        creditCartNumber,
+        creditCardNumber,
         creditCardExpiration,
         creditCardHolderName,
         creditCardCvv,
@@ -53,7 +56,7 @@ class TransactionController {
         billingCity: Yup.string().required(),
         billingState: Yup.string().required(),
         billingZipCode: Yup.string().required(),
-        creditCartNumber: Yup.string().when(
+        creditCardNumber: Yup.string().when(
           "paymentType",
           (paymentType, schema) => {
             return paymentType === "credit_card" ? schema.required() : schema;
@@ -84,6 +87,45 @@ class TransactionController {
           error: "Error on validate schema",
         });
       }
+
+      const cart = await Cart.findOne({ code: cartCode });
+
+      if (!cart) {
+        return res.status(404).json();
+      }
+
+      // Criar Transaction;
+      //Integrar com o pagarme;
+      // Processar regras;
+
+      const service = new TransactionService();
+      const response = await service.process({
+        cartCode,
+        paymentType,
+        installments,
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          mobile: customerMobile,
+          document: customerDocument,
+        },
+        billing: {
+          address: billingAddress,
+          number: billingNumber,
+          neighborhood: billingNeighborhood,
+          city: billingCity,
+          state: billingState,
+          zipCode: billingZipCode,
+        },
+        creditCard: {
+          number: creditCardNumber,
+          expiration: creditCardExpiration,
+          holdName: creditCardHolderName,
+          cvv: creditCardCvv,
+        },
+      });
+
+      return res.status(200).json(response);
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: "Internal server error." });

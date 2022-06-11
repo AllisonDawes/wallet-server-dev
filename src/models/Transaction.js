@@ -6,7 +6,7 @@ const schema = mongoose.Schema(
       type: String,
       required: true,
     },
-    cart: {
+    code: {
       type: String,
       required: true,
       unique: true,
@@ -27,7 +27,7 @@ const schema = mongoose.Schema(
     },
     paymentType: {
       type: String,
-      enum: ["billet", "credit_cart"],
+      enum: ["billet", "credit_card"],
       required: true,
     },
     installments: {
@@ -54,7 +54,7 @@ const schema = mongoose.Schema(
     customerDocument: {
       type: String,
     },
-    billlingAddress: {
+    billingAddress: {
       type: String,
     },
     billingNumber: {

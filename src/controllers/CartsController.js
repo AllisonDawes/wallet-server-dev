@@ -4,7 +4,7 @@ class CartsController {
   async index(req, res) {
     try {
       const carts = await Cart.find();
-      return res.status(200).json({ foo: "bar" });
+      return res.status(200).json(carts);
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: "Internal server error." });
